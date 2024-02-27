@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Transações</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #c82333;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        #voltarButton {
+            margin: 20px auto;
+            display: block;
+        }
+
+        #saldo {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            ul li {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Transações</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Valor</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Excluir</th>
+            </tr>
+        </thead>
+        <tbody id="transactionList"></tbody>
+    </table>
+
+    <div id="saldo">Saldo: R$ <span id="saldoValor"></span></div>
+
+    <button id="voltarButton" onclick="window.history.back()">Voltar</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var transactionList = document.getElementById("transactionList");
+            var saldoValor = document.getElementById("saldoValor");
+
+            // Recupera as transações salvas do armazenamento local
+            var transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+            // Variáveis para controlar o saldo
+            var receitas = 0;
+            var despesas = 0;
+
+            // Itera sobre as transações e as adiciona à tabela
+            transactions.forEach(function(transaction, index) {
+                var row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${transaction.nome}</td>
+                    <td>R$ ${transaction.valor}</td>
+                    <td>${transaction.tipo}</td>
+                    <td>${transaction.descricao}</td>
+                    <td><button onclick="removeTransaction(${index})">Excluir</button></td>
+                `;
+                transactionList.appendChild(row);
+
+                // Atualiza as receitas e despesas
+                if (transaction.tipo === 'receita') {
+                    receitas += parseFloat(transaction.valor);
+                } else {
+                    despesas += parseFloat(transaction.valor);
+                }
+            });
+
+            // Calcula o saldo
+            var saldo = receitas - despesas;
+            saldoValor.textContent = saldo.toFixed(2);
+        });
+
+        function removeTransaction(index) {
+            // Recupera as transações salvas do armazenamento local
+            var transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+            
+            // Remove a transação da lista
+            transactions.splice(index, 1);
+            
+            // Atualiza o armazenamento local
+            localStorage.setItem("transactions", JSON.stringify(transactions));
+            
+            // Remove a linha da tabela
+            document.getElementById("transactionList").deleteRow(index);
+        }
+    </script>
+</body>
+</html>
